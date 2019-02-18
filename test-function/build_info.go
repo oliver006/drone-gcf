@@ -1,0 +1,3 @@
+package function
+
+var BuildHash = ""

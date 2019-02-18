@@ -1,0 +1,156 @@
+kind: pipeline
+name: default
+
+workspace:
+  base: /go
+  path: src/github.com/oliver006/drone-gcf
+
+steps:
+  - name: test
+    image: "golang:1.11"
+    commands:
+      - "go get github.com/mattn/goveralls"
+      - "go build"
+      - "go test -v -covermode=atomic -cover -race -coverprofile=coverage.txt"
+      - "/go/bin/goveralls -v -coverprofile=coverage.txt -service=drone.io -repotoken=g63OgXjgtH4xHQa3Mym4HmkOsQ3a7rAe0"
+    when:
+      event:
+        - push
+        - pull-request
+
+
+  - name: create-build-info
+    image: alpine
+    commands:
+      - 'echo "  package main;     var BuildTag  = \"$DRONE_TAG\" "        > build_info.go '
+      - 'echo "  package function; var BuildHash = \"$DRONE_COMMIT_SHA\" " > test-function/build_info.go '
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: build-and-publish-latest
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      dockerfile: ./Dockerfile
+      repo: oliver006/drone-gcf
+      target: release
+      debug: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      branch:
+      - master
+      event:
+      - push
+
+
+  # sleep 10 seconds to give the docker registry a few moments to ingest the new image
+  # so on the next step it hopefully will be downloaded and used
+  - name: sleep-10s
+    image: alpine
+    commands:
+      - sleep 10
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: deploy-test-cloud-function
+    image: oliver006/drone-gcf:latest
+    pull: true
+    settings:
+      action: deploy
+      token:
+        from_secret: token
+      functions:
+        - TestDeployment:
+          - trigger: http
+            memory: 128MB
+            runtime: go111
+            source: ./test-function/
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  # sleep again for 5 seconds to give GCF time to bring up the new function
+  - name: sleep-5s
+    image: alpine
+    commands:
+      - sleep 5
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: test-deployed-test-function
+    image: "golang:1.11"
+    environment:
+      GCF_URL: "https://us-central1-phone-21zoo-com.cloudfunctions.net/TestDeployment"
+    commands:
+      - "cd test-function && go test -v"
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: delete-test-cloud-function
+    image: oliver006/drone-gcf:latest
+    pull: true
+    settings:
+      action: delete
+      token:
+        from_secret: token
+      functions:
+        - TestDeployment
+    when:
+      status: [ success, failure ]
+      branch:
+        - master
+      event:
+        - push
+
+
+
+#
+# Steps for tagged releases
+#
+#
+  - name: create-build-info-tagged
+    image: alpine
+    commands:
+      - 'echo "  package main;     var BuildTag  = \"$DRONE_TAG\" "        > build_info.go '
+      - 'echo "  package function; var BuildHash = \"$DRONE_COMMIT_SHA\" " > test-function/build_info.go '
+    when:
+      event:
+        - tag
+
+  - name: build-and-publish-tagged
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      dockerfile: ./Dockerfile
+      repo: oliver006/drone-gcf
+      target: release
+      debug: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+        - tag
