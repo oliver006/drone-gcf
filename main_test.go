@@ -116,6 +116,11 @@ func TestParseConfig(t *testing.T) {
 		},
 		{
 			expectedToBeOk:    true,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"lol123\",\"memory\":\"2048MB\"}]}]"},
+			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:    true,
 			Env:               map[string]string{"PLUGIN_ACTION": "delete", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "DeleteFunction1,DeleteFunction2"},
 			expectedProjectId: "my-project-id",
 		},

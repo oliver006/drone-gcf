@@ -149,8 +149,12 @@ func parseConfig() (*Config, error) {
 	if cfg.Action == "" {
 		return nil, fmt.Errorf("Missing action")
 	}
+
 	if cfg.Token == "" {
-		return nil, fmt.Errorf("Missing token")
+		cfg.Token = os.Getenv("TOKEN")
+		if cfg.Token == "" {
+			return nil, fmt.Errorf("Missing token")
+		}
 	}
 
 	defaultRuntime := os.Getenv("PLUGIN_RUNTIME")
