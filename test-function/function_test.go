@@ -23,13 +23,12 @@ func TestFunctionDeployment(t *testing.T) {
 		}
 
 		if resp, err := client.Get(urlString); err == nil {
-
 			if body, err := ioutil.ReadAll(resp.Body); err == nil {
 				if idx := strings.Index(string(body), BuildHash); idx != -1 {
 					log.Printf("Found hash: %s - great success", BuildHash)
 					return
 				} else {
-					log.Printf("didn't find hash %s   - body: %s", BuildHash, string(body))
+					log.Printf("didn't find hash %s   - body: [%s]", BuildHash, string(body))
 				}
 			} else {
 				log.Printf("ioutil.ReadAll: %v", err)
@@ -37,7 +36,10 @@ func TestFunctionDeployment(t *testing.T) {
 		} else {
 			log.Printf("http.Get: %v", err)
 		}
-		log.Printf("Sleep for 3 seconds and try again")
-		time.Sleep(3 * time.Second)
+
+		log.Printf("Going to sleep for 5 seconds and then will try %d more times", count)
+		time.Sleep(5 * time.Second)
 	}
+
+	t.Errorf("Didn't find hash %s", BuildHash)
 }
