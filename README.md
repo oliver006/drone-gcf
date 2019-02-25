@@ -83,6 +83,6 @@ by setting the `project` parameter.
 The runtime can be set on a per-function basis or for all functions at once. In the example above, the runtime 
 is set to `go111` for all functions and then overwritten with `python37` for just `ProcessEmails`.
 This will result in the plugin deploying three functions, two in Golang and one in Python.
-If no runtime setting is provided to the plugin it will default to `go111`.
+If no runtime setting is provided at all, the plugin will fail.
 
 Similarly, you can set the `source` location of each function in case you keep the code in separate folders.

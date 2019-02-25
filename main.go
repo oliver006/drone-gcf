@@ -71,7 +71,8 @@ func isValidTriggerType(t string) bool {
 
 func isValidFunctionForDeploy(f Function) bool {
 	if !isValidRuntime(f.Runtime) {
-		log.Printf("Invalid runtime: %s - continuing anyway", f.Runtime)
+		log.Printf("Missing or invalid runtime [%s] for function: %s", f.Runtime, f.Name)
+		return false
 	}
 
 	if f.Trigger == "http" {

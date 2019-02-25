@@ -111,12 +111,12 @@ func TestParseConfig(t *testing.T) {
 		},
 		{
 			expectedToBeOk:    true,
-			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"lol123\",\"memory\":\"2048MB\"}]}]"},
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"python37\",\"memory\":\"2048MB\"}]}]"},
 			expectedProjectId: "my-project-id",
 		},
 		{
 			expectedToBeOk:    true,
-			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"lol123\",\"memory\":\"2048MB\"}]}]"},
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"python37\",\"memory\":\"2048MB\"}]}]"},
 			expectedProjectId: "my-project-id",
 		},
 		{
@@ -136,6 +136,16 @@ func TestParseConfig(t *testing.T) {
 		{
 			expectedToBeOk:    false,
 			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": invalidGCPKey, "PLUGIN_FUNCTIONS": pf},
+			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:    false,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"lol123\",\"memory\":\"2048MB\"}]}]"},
+			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:    false,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_RUNTIME": "python37", "TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"lol123\",\"memory\":\"2048MB\"}]}]"},
 			expectedProjectId: "my-project-id",
 		},
 		{
