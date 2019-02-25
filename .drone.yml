@@ -34,7 +34,7 @@ steps:
   - name: build-and-publish-latest
     image: plugins/docker
     settings:
-      auto_tag: true
+      tags: latest
       dockerfile: ./Dockerfile
       repo: oliver006/drone-gcf
       target: release
@@ -135,6 +135,7 @@ steps:
     commands:
       - 'echo "  package main;     var BuildTag  = \"$DRONE_TAG\" "        > build_info.go '
       - 'echo "  package function; var BuildHash = \"$DRONE_COMMIT_SHA\" " > test-function/build_info.go '
+      - 'echo -n "latest,$DRONE_TAG"                                       > .tags'
     when:
       event:
         - tag
@@ -142,7 +143,6 @@ steps:
   - name: build-and-publish-tagged
     image: plugins/docker
     settings:
-      auto_tag: true
       dockerfile: ./Dockerfile
       repo: oliver006/drone-gcf
       target: release
