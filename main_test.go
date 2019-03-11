@@ -55,7 +55,7 @@ func TestParseFunctionsForDeploy(t *testing.T) {
 
 func TestParseFunctionsForDelete(t *testing.T) {
 	for _, tst := range []string{
-		"TransferFile,Func1234,ThirdFunc",
+		"TransferFile,ProcessEvents4,ThirdFunc",
 	} {
 		functions := parseFunctions(tst, "go111")
 		if len(functions) == 0 {
@@ -85,9 +85,10 @@ func TestParseFunctionsforDeploy(t *testing.T) {
 func TestParseConfig(t *testing.T) {
 	pf := "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"go111\",\"memory\":\"2048MB\"}]}]"
 	for _, tst := range []struct {
-		Env               map[string]string
-		expectedToBeOk    bool
-		expectedProjectId string
+		Env                map[string]string
+		expectedToBeOk     bool
+		expectedProjectId  string
+		expectedEnvSecrets []string
 	}{
 		{
 			expectedToBeOk:    true,
@@ -96,8 +97,19 @@ func TestParseConfig(t *testing.T) {
 		},
 		{
 			expectedToBeOk:    true,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": pf, "PLUGIN_ENV_SECRET_API_KEY": "api-key-123"},
+			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:    true,
 			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": pf},
 			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:     true,
+			Env:                map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": pf, "PLUGIN_ENV_SECRET_API_KEY": "secret-api-key"},
+			expectedProjectId:  "my-project-id",
+			expectedEnvSecrets: []string{"API_KEY=secret-api-key"},
 		},
 		{
 			expectedToBeOk:    true,
@@ -124,6 +136,8 @@ func TestParseConfig(t *testing.T) {
 			Env:               map[string]string{"PLUGIN_ACTION": "delete", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "DeleteFunction1,DeleteFunction2"},
 			expectedProjectId: "my-project-id",
 		},
+
+		// [{"TransferFile":[{"environment":[{"ENV_KEY_01":"env_key_01"},{"ENV_KEY_02":"env_key_02"},{"ENV_KEY_03":"env_key_03"}],"memory":"2048MB","runtime":"go111","trigger":"http"}]}]
 
 		/*
 			broken configs
@@ -179,6 +193,211 @@ func TestParseConfig(t *testing.T) {
 		if cfg.Project != tst.expectedProjectId {
 			t.Errorf("expected projectID: %s   got: %s", tst.expectedProjectId, cfg.Project)
 		}
+
+		for _, e := range tst.expectedEnvSecrets {
+			found := false
+			for _, s := range cfg.EnvSecrets {
+				if s == e {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("missing env secret: %s, got: %#v", e, cfg.EnvSecrets)
+			}
+		}
+	}
+}
+
+func TestExecutePlan(t *testing.T) {
+	pId := "my-project-123"
+	for _, tst := range []struct {
+		cfg            Config
+		expectedToBeOk bool
+		expectedPlan   [][]string
+	}{
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:    "ProcessEvents",
+						Runtime: "go111",
+						Trigger: "http",
+						Memory:  "512MB",
+						Timeout: "20s",
+					},
+					{
+						Name:            "ProcessPubSub",
+						Runtime:         "python37",
+						Trigger:         "topic",
+						TriggerResource: "topic/emails/filtered",
+						Memory:          "2048MB",
+						Timeout:         "20s",
+					},
+					{
+						Name:            "ProcessNews",
+						Runtime:         "go111",
+						Trigger:         "bucket",
+						TriggerResource: "gs://bucket/files/cool",
+						Source:          "src/",
+						Region:          "us-east1",
+						Retry:           "3",
+					},
+					{
+						Name:            "ProcessMoreEvents",
+						Runtime:         "go111",
+						Trigger:         "event",
+						TriggerResource: "my.trigger.resource",
+						TriggerEvent:    "my.event",
+						EntryPoint:      "FuncEntryPoint",
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action:     "deploy",
+				EnvSecrets: []string{"ENV_SECRET_123=WUT"},
+				Functions: Functions{
+					{
+						Name:        "ProcessEvents",
+						Runtime:     "go111",
+						Trigger:     "http",
+						Memory:      "512MB",
+						Environment: []map[string]string{{"K": "V"}},
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:        "ProcessEvents",
+						Runtime:     "go111",
+						Trigger:     "http",
+						Memory:      "512MB",
+						Environment: []map[string]string{{"K": "V"}},
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action:     "deploy",
+				EnvSecrets: []string{"ENV_SECRET_123=WUT"},
+				Functions: Functions{
+					{
+						Name:    "ProcessEvents",
+						Runtime: "go111",
+						Trigger: "http",
+						Memory:  "512MB",
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action: "delete",
+				Functions: Functions{
+					{
+						Name: "ProcessEvents",
+					},
+					{
+						Name:   "Func567",
+						Region: "us-east1",
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan:   [][]string{{"--quiet", "functions", "delete", "--project", "my-project-123", "ProcessEvents"}, {"--quiet", "functions", "delete", "--project", "my-project-123", "Func567", "--region", "us-east1"}},
+		},
+
+		{
+			cfg: Config{
+				Action: "list",
+			},
+			expectedToBeOk: true,
+			expectedPlan:   [][]string{{"--quiet", "functions", "list", "--project", pId}},
+		},
+
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:    "ProcessNews",
+						Runtime: "go111",
+						Trigger: "bucket",
+					},
+				},
+			},
+			expectedToBeOk: false,
+		},
+
+		{
+			cfg: Config{
+				Action: "call",
+			},
+			expectedToBeOk: false,
+		},
+		{
+			cfg: Config{
+				Action: "invalid",
+			},
+			expectedToBeOk: false,
+		},
+	} {
+		tst.cfg.Project = pId
+		plan, err := CreateExecutionPlan(&tst.cfg)
+		if err != nil && tst.expectedToBeOk == true {
+			t.Errorf("CreateExecutionPlan(  %#v  ) failed, err: %s", tst, err)
+			return
+		}
+
+		if len(plan.Steps) != len(tst.expectedPlan) {
+			t.Errorf("not matching,\n\n   got: %#v              \nwanted: %#v", plan.Steps, tst.expectedPlan)
+			return
+		}
+
+		for i := range plan.Steps {
+			if len(plan.Steps[i]) != len(tst.expectedPlan[i]) {
+				t.Errorf("not matching number of args,\n\n   got: %#v              \nwanted: %#v", plan.Steps[i], tst.expectedPlan[i])
+				return
+			}
+
+			for j := range plan.Steps[i] {
+				if plan.Steps[i][j] != tst.expectedPlan[i][j] {
+					t.Errorf("not matching args: %s    %s", plan.Steps[i][j], tst.expectedPlan[i][j])
+				}
+			}
+		}
+
 	}
 }
 
@@ -186,9 +405,9 @@ func TestEnvironRun(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 
-	e := NewEnviron("/tmp", []string{"ABC=123"}, stdout, stderr)
+	e := NewEnv("/tmp", []string{"ABC=123"}, stdout, stderr, false)
 
-	if err := e.Run(false, "/bin/echo", "sup"); err == nil {
+	if err := e.Run("/bin/echo", "sup"); err == nil {
 		if stdout.String() != "sup\n" {
 			t.Errorf("got stdout : %s", stdout.String())
 		}
@@ -199,7 +418,7 @@ func TestEnvironRun(t *testing.T) {
 		t.Errorf("got err: %s", err)
 	}
 
-	if err := e.Run(false, "/usr/bin/env"); err == nil {
+	if err := e.Run("/usr/bin/env"); err == nil {
 		if strings.Index(stdout.String(), "ABC=123") == -1 {
 			t.Errorf("didn't find ABC in Env, got: %s", stdout.String())
 		}
@@ -209,7 +428,6 @@ func TestEnvironRun(t *testing.T) {
 }
 
 func TestGetProjectFromToken(t *testing.T) {
-
 	if id := getProjectFromToken(validGCPKey); id != "my-project-id" {
 		t.Errorf("Wrong project id, got: %s", id)
 	}

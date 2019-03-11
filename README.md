@@ -69,7 +69,7 @@ steps:
 ```
 
 
-The plugin supports several types of triggers:
+The plugin supports several types of Cloud Function triggers:
 - `http`   - triggered for every request to an HTTP endpoint, no other parameters are needed. (see gcloud output for URL of the endpoint).
 - `bucket` - triggered for every change in files in a GCS bucket. Supply the name of the bucket via `trigger_resource`.
 - `topic`  - triggered for every message published to a PubSub topic. Supply the name of the topic via `trigger_resource`.
@@ -86,3 +86,5 @@ This will result in the plugin deploying three functions, two in Golang and one 
 If no runtime setting is provided at all, the plugin will fail.
 
 Similarly, you can set the `source` location of each function in case you keep the code in separate folders.
+
+There are two ways to set environment variables. 
