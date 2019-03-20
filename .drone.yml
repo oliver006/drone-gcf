@@ -70,8 +70,6 @@ steps:
             environment:
               - REGULAR_ENV_VAR: env_var_123
                 BUILD_HASH: "${DRONE_COMMIT_SHA}"
-                SECRET_API_KEY:
-                  from_secret: env_secret_api_key
                 ENV_VAR_WITH_SPACE: "oh noes"
                 ENV_VAR_WITH_QUOTES: 'oh " my'
                 ENV_VAR_WITH_COMMA: 'oh , well'
