@@ -1,6 +1,7 @@
 package function
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +13,22 @@ import (
 )
 
 func TestFunctionDeployment(t *testing.T) {
-	for count := 10; count > 0; count-- {
+	BuildHash := os.Getenv("BUILD_HASH")
+	if BuildHash == "" {
+		t.Errorf("Didn't find build hash env var")
+		return
+	}
+
+	WhatWeWant := []string{
+		BuildHash,
+		"oh noes",
+		`oh " my`,
+		`oh , well`,
+		"env_var_123",
+		"secret-api-key-123",
+	}
+
+	for count := 15; count > 0; count-- {
 		client := http.Client{
 			Timeout: 10 * time.Second,
 		}
@@ -24,11 +40,19 @@ func TestFunctionDeployment(t *testing.T) {
 
 		if resp, err := client.Get(urlString); err == nil {
 			if body, err := ioutil.ReadAll(resp.Body); err == nil {
-				if idx := strings.Index(string(body), BuildHash); idx != -1 {
-					log.Printf("Found hash: %s - great success", BuildHash)
+				greatSuccess := true
+				for _, want := range WhatWeWant {
+					want = fmt.Sprintf("[%s]", want)
+					if idx := strings.Index(string(body), want); idx != -1 {
+						log.Printf("Found %s - great success", want)
+					} else {
+						log.Printf("didn't find %s   - body: [%s]", want, string(body))
+						greatSuccess = false
+					}
+				}
+
+				if greatSuccess {
 					return
-				} else {
-					log.Printf("didn't find hash %s   - body: [%s]", BuildHash, string(body))
 				}
 			} else {
 				log.Printf("ioutil.ReadAll: %v", err)
@@ -37,9 +61,9 @@ func TestFunctionDeployment(t *testing.T) {
 			log.Printf("http.Get: %v", err)
 		}
 
-		log.Printf("Going to sleep for 5 seconds and then will try %d more times", count)
-		time.Sleep(5 * time.Second)
+		log.Printf("Going to sleep for 7 seconds and then will try %d more times", count)
+		time.Sleep(7 * time.Second)
 	}
 
-	t.Errorf("Didn't find hash %s", BuildHash)
+	t.Errorf("Didn't find what we were looking for: %#v", WhatWeWant)
 }

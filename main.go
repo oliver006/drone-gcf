@@ -26,29 +26,33 @@ type Function struct {
 	Runtime    string `json:"runtime"`
 	Source     string `json:"source"`
 	Timeout    string `json:"timeout"`
+
+	Environment []map[string]string `json:"environment"`
 }
+
 type Functions []Function
 
 type Config struct {
-	Action  string `json:"action"`
-	DryRun  bool   `json:"-"`
-	Dir     string `json:"-"`
-	Project string `json:"-"`
-	Token   string `json:"token"`
-	Runtime string `json:"runtime"`
-
-	Functions Functions `json:"functions"`
+	Action     string
+	DryRun     bool
+	Dir        string
+	Project    string
+	Token      string
+	Runtime    string
+	EnvSecrets []string
+	Functions  Functions
 }
 
 const (
-	// location of temp key file in the ephemeral drone container that runs drone-gcf
-	TokenFileLocation = "/tmp/token.json"
+	// location of temp key file within the ephemeral drone container that runs drone-gcf
+	TmpTokenFileLocation = "/tmp/token.json"
 )
 
 var (
 	// populated by "go build"
 	BuildDate string
 	BuildHash string
+	BuildTag  string
 )
 
 func isValidRuntime(r string) bool {
@@ -151,6 +155,15 @@ func parseConfig() (*Config, error) {
 		return nil, fmt.Errorf("Missing action")
 	}
 
+	PluginEnvSecretPrefix := "PLUGIN_ENV_SECRET_"
+	for _, e := range os.Environ() {
+		if s := strings.SplitN(e, "=", 2); len(s) > 0 && strings.HasPrefix(s[0], PluginEnvSecretPrefix) {
+			k := strings.TrimPrefix(s[0], PluginEnvSecretPrefix)
+			v := os.Getenv(s[0])
+			cfg.EnvSecrets = append(cfg.EnvSecrets, fmt.Sprintf(`%s=%s`, k, v))
+		}
+	}
+
 	if cfg.Token == "" {
 		cfg.Token = os.Getenv("TOKEN")
 		if cfg.Token == "" {
@@ -189,13 +202,14 @@ func parseConfig() (*Config, error) {
 	return &cfg, nil
 }
 
-func runConfig(cfg *Config) error {
-	e := NewEnviron(cfg.Dir, os.Environ(), os.Stdout, os.Stderr)
-	if err := e.Run(cfg.DryRun, "gcloud", "auth", "activate-service-account", "--key-file", TokenFileLocation); err != nil {
-		return err
-	}
+type Plan struct {
+	Steps [][]string
+}
 
-	args := []string{
+func CreateExecutionPlan(cfg *Config) (Plan, error) {
+	res := Plan{Steps: [][]string{}}
+
+	baseArgs := []string{
 		"--quiet",
 		"functions",
 		cfg.Action,
@@ -204,95 +218,127 @@ func runConfig(cfg *Config) error {
 
 	switch cfg.Action {
 	case "call":
-		return fmt.Errorf("action: %s not implemented yet", cfg.Action)
+		return res, fmt.Errorf("action: %s not implemented yet", cfg.Action)
 	case "deploy":
 		for _, f := range cfg.Functions {
 			if !isValidFunctionForDeploy(f) {
-				continue
+				return res, fmt.Errorf("invalid config for function: %s", f.Name)
 			}
 
-			runArgs := append(args, f.Name, "--runtime", f.Runtime)
+			args := append(baseArgs, f.Name, "--runtime", f.Runtime)
 
 			switch f.Trigger {
 			case "bucket":
-				runArgs = append(runArgs, "--trigger-bucket", f.TriggerResource)
+				args = append(args, "--trigger-bucket", f.TriggerResource)
 			case "http":
-				runArgs = append(runArgs, "--trigger-http")
+				args = append(args, "--trigger-http")
 			case "topic":
-				runArgs = append(runArgs, "--trigger-topic", f.TriggerResource)
+				args = append(args, "--trigger-topic", f.TriggerResource)
 			case "event":
-				runArgs = append(runArgs, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
+				args = append(args, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
 			}
 
 			if f.Source != "" {
-				runArgs = append(runArgs, "--source", f.Source)
+				args = append(args, "--source", f.Source)
 			}
 			if f.Memory != "" {
-				runArgs = append(runArgs, "--memory", f.Memory)
+				args = append(args, "--memory", f.Memory)
 			}
 			if f.EntryPoint != "" {
-				runArgs = append(runArgs, "--entry-point", f.EntryPoint)
+				args = append(args, "--entry-point", f.EntryPoint)
 			}
 			if f.Region != "" {
-				runArgs = append(runArgs, "--region", f.Region)
+				args = append(args, "--region", f.Region)
 			}
 			if f.Retry != "" {
-				runArgs = append(runArgs, "--retry", f.Retry)
+				args = append(args, "--retry", f.Retry)
 			}
 			if f.Timeout != "" {
-				runArgs = append(runArgs, "--timeout", f.Timeout)
+				args = append(args, "--timeout", f.Timeout)
+			}
+			if len(cfg.EnvSecrets) > 0 || len(f.Environment) > 0 {
+				e := make([]string, len(cfg.EnvSecrets))
+				copy(e, cfg.EnvSecrets)
+
+				if len(f.Environment) > 0 {
+					for k, v := range f.Environment[0] {
+						e = append(e, fmt.Sprintf(`%s=%s`, k, v))
+					}
+				}
+
+				// we're using ":|:" as the separator for the args
+				envStr := strings.Join(e, ":|:")
+				envStr = "^:|:^" + envStr
+				args = append(args, "--set-env-vars", envStr)
 			}
 
-			err := e.Run(cfg.DryRun, "gcloud", runArgs...)
-			if err != nil {
-				return fmt.Errorf("error: %s\n", err)
-			}
+			res.Steps = append(res.Steps, args)
 		}
 
 	case "delete":
 		for _, f := range cfg.Functions {
-			runArgs := append(args, f.Name)
+			args := append(baseArgs, f.Name)
 			if f.Region != "" {
-				runArgs = append(runArgs, "--region", f.Region)
+				args = append(args, "--region", f.Region)
 			}
-			err := e.Run(cfg.DryRun, "gcloud", runArgs...)
-			if err != nil {
-				return fmt.Errorf("error: %s\n", err)
-			}
+			res.Steps = append(res.Steps, args)
 		}
 
 	case "list":
-		err := e.Run(cfg.DryRun, "gcloud", args...)
-		if err != nil {
-			return fmt.Errorf("error: %s\n", err)
-		}
+		res.Steps = append(res.Steps, baseArgs)
 
 	default:
-		return fmt.Errorf("action: %s not implemented yet", cfg.Action)
+		return res, fmt.Errorf("action: %s not implemented yet", cfg.Action)
+	}
+
+	return res, nil
+}
+
+func ExecutePlan(e *Env, plan Plan) error {
+	for _, args := range plan.Steps {
+		if err := e.Run("gcloud", args...); err != nil {
+			return fmt.Errorf("error: %s\n", err)
+		}
 	}
 
 	return nil
 }
 
-type Environ struct {
+func runConfig(cfg *Config) error {
+	plan, err := CreateExecutionPlan(cfg)
+	if err != nil {
+		return err
+	}
+
+	e := NewEnv(cfg.Dir, os.Environ(), os.Stdout, os.Stderr, cfg.DryRun)
+	if err := e.Run("gcloud", "auth", "activate-service-account", "--key-file", TmpTokenFileLocation); err != nil {
+		return err
+	}
+
+	return ExecutePlan(e, plan)
+}
+
+type Env struct {
 	dir    string
 	env    []string
 	stdout io.Writer
 	stderr io.Writer
+	dryRun bool
 }
 
-func NewEnviron(dir string, env []string, stdout, stderr io.Writer) *Environ {
-	return &Environ{
+func NewEnv(dir string, env []string, stdout, stderr io.Writer, dryRun bool) *Env {
+	return &Env{
 		dir:    dir,
 		env:    env,
 		stdout: stdout,
 		stderr: stderr,
+		dryRun: dryRun,
 	}
 }
 
-func (e *Environ) Run(dryRun bool, name string, arg ...string) error {
+func (e *Env) Run(name string, arg ...string) error {
 	log.Printf("Running: %s %#v", name, arg)
-	if dryRun {
+	if e.dryRun {
 		return nil
 	}
 	cmd := exec.Command(name, arg...)
@@ -323,12 +369,12 @@ func main() {
 		return
 	}
 
-	if err := ioutil.WriteFile(TokenFileLocation, []byte(cfg.Token), 0600); err != nil {
+	if err := ioutil.WriteFile(TmpTokenFileLocation, []byte(cfg.Token), 0600); err != nil {
 		log.Fatalf("Error writing token file: %s", err)
 	}
 
 	defer func() {
-		os.Remove(TokenFileLocation)
+		os.Remove(TmpTokenFileLocation)
 	}()
 
 	if err := runConfig(cfg); err != nil {

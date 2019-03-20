@@ -38,10 +38,16 @@ steps:
       token:
         from_secret: token
       runtime: go111
+      env_secret_db_password:
+        from_secret: db_password_prod
+      env_secret_user_api_key:
+        from_secret: user_api_key_prod
       functions:
         - TransferFileToGCS:
           - trigger: http
             memory: 2048MB
+            environment:
+              - ENV_VAR: env_var_value_123
         - HandleEvents:
           - trigger: topic
             trigger_resource: "projects/myproject/topics/mytopic"
@@ -69,7 +75,7 @@ steps:
 ```
 
 
-The plugin supports several types of triggers:
+The plugin supports several types of Google Cloud Function triggers:
 - `http`   - triggered for every request to an HTTP endpoint, no other parameters are needed. (see gcloud output for URL of the endpoint).
 - `bucket` - triggered for every change in files in a GCS bucket. Supply the name of the bucket via `trigger_resource`.
 - `topic`  - triggered for every message published to a PubSub topic. Supply the name of the topic via `trigger_resource`.
@@ -82,7 +88,20 @@ by setting the `project` parameter.
 
 The runtime can be set on a per-function basis or for all functions at once. In the example above, the runtime 
 is set to `go111` for all functions and then overwritten with `python37` for just `ProcessEmails`.
-This will result in the plugin deploying three functions, two in Golang and one in Python.
+This will result in the plugin deploying three functions, two in Golang and one in Python. \
 If no runtime setting is provided at all, the plugin will fail.
 
 Similarly, you can set the `source` location of each function in case you keep the code in separate folders.
+
+There are two ways to set environment variables when deploying cloud functions:
+- from a secret
+- putting the value directly into the drone.yml file
+
+To pull in an environment variable value from a secret, add an entry to the settings that starts
+with `env_secret_` followed by the name as which the variable will be made available to the cloud function.
+In the config example above, drone will pull the values from the secrets `db_password_prod` and `user_api_key_prod` and
+make them available as `DB_PASSWORD` and `USER_API_KEY`. (env variable names will be upper-case) \
+
+Environment variables from secrets will be made available to *all* functions that you deploy within one drone step.
+If, for whatever reasons, this is not acceptable and you need to keep them separate then you have to use
+multiple drone steps, one for each function.

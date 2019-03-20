@@ -1,9 +1,14 @@
 FROM golang as builder
 WORKDIR /go/src/github.com/oliver006/drone-gcf
 
+ARG SHA1
+ENV SHA1=$SHA1
+ARG TAG
+ENV TAG=$TAG
+
 ADD . /go/src/github.com/oliver006/drone-gcf/
-RUN GIT_COMMIT=$(git rev-list -1 HEAD) && BUILD_DATE=$(date +%F-%T) && \
-    CGO_ENABLED=0 GOOS=linux go build -o drone-gcf -ldflags "-s -w -extldflags \"-static\" -X main.BuildHash=$GIT_COMMIT  -X main.BuildDate=$BUILD_DATE" .
+RUN BUILD_DATE=$(date +%F-%T) && CGO_ENABLED=0 GOOS=linux go build -o drone-gcf \
+    -ldflags "-s -w -extldflags \"-static\" -X main.BuildHash=$SHA1 -X main.BuildTag=$TAG -X main.BuildDate=$BUILD_DATE" .
 RUN ./drone-gcf -v
 
 
