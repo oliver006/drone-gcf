@@ -1,4 +1,4 @@
-FROM golang as builder
+FROM golang:1 as builder
 WORKDIR /go/src/github.com/oliver006/drone-gcf
 
 ARG SHA1
