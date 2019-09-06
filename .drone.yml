@@ -7,7 +7,7 @@ workspace:
 
 steps:
   - name: test
-    image: "golang:1"
+    image: "golang:1.13"
     environment:
       COVERALLS_TOKEN:
         from_secret: coveralls-token
@@ -79,7 +79,7 @@ steps:
 
 
   - name: test-deployed-test-function-tst
-    image: "golang:1"
+    image: "golang:1.13"
     environment:
       GCF_URL: "https://us-central1-phone-21zoo-com.cloudfunctions.net/TestDeployment"
       BUILD_HASH: "${DRONE_COMMIT_SHA}"
@@ -189,7 +189,7 @@ steps:
 
 
   - name: test-deployed-test-function
-    image: "golang:1"
+    image: "golang:1.13"
     environment:
       GCF_URL: "https://us-central1-phone-21zoo-com.cloudfunctions.net/TestDeployment"
     commands:
