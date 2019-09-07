@@ -192,6 +192,7 @@ steps:
     image: "golang:1.13"
     environment:
       GCF_URL: "https://us-central1-phone-21zoo-com.cloudfunctions.net/TestDeployment"
+      BUILD_HASH: "${DRONE_COMMIT_SHA}"
     commands:
       - "cd test-function && go test -v"
     when:

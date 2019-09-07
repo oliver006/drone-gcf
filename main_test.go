@@ -256,10 +256,10 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
+				{"functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
+				{"functions", "deploy", "--project", pId, "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
+				{"functions", "deploy", "--project", pId, "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
+				{"functions", "deploy", "--project", pId, "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
 			},
 		},
 
@@ -279,7 +279,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
+				{"functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
 			},
 		},
 
@@ -298,7 +298,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
+				{"functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
 			},
 		},
 
@@ -317,7 +317,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
+				{"functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
 			},
 		},
 
@@ -335,7 +335,7 @@ func TestExecutePlan(t *testing.T) {
 				},
 			},
 			expectedToBeOk: true,
-			expectedPlan:   [][]string{{"--quiet", "functions", "delete", "--project", "my-project-123", "ProcessEvents"}, {"--quiet", "functions", "delete", "--project", "my-project-123", "Func567", "--region", "us-east1"}},
+			expectedPlan:   [][]string{{"functions", "delete", "--project", "my-project-123", "ProcessEvents"}, {"functions", "delete", "--project", "my-project-123", "Func567", "--region", "us-east1"}},
 		},
 
 		{
@@ -343,7 +343,7 @@ func TestExecutePlan(t *testing.T) {
 				Action: "list",
 			},
 			expectedToBeOk: true,
-			expectedPlan:   [][]string{{"--quiet", "functions", "list", "--project", pId}},
+			expectedPlan:   [][]string{{"functions", "list", "--project", pId}},
 		},
 
 		{
