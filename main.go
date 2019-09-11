@@ -28,6 +28,9 @@ type Function struct {
 	Timeout    string `json:"timeout"`
 
 	Environment []map[string]string `json:"environment"`
+
+	// used for action==call
+	Data string
 }
 
 type Functions []Function
@@ -218,7 +221,17 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 
 	switch cfg.Action {
 	case "call":
-		return res, fmt.Errorf("action: %s not implemented yet", cfg.Action)
+		for _, f := range cfg.Functions {
+			args := append(baseArgs, f.Name)
+			if f.Region != "" {
+				args = append(args, "--region", f.Region)
+			}
+			if f.Data != "" {
+				args = append(args, "--data", f.Data)
+			}
+			res.Steps = append(res.Steps, args)
+		}
+
 	case "deploy":
 		for _, f := range cfg.Functions {
 			if !isValidFunctionForDeploy(f) {

@@ -7,12 +7,14 @@
 
 ### Overview
 
-The plugin supports deploying, listing,  and deleting of multiple functions at once. 
+The plugin supports deploying, listing, calling, and deleting of multiple functions at once.
 See below for an example drone.yml configuration that deploys several functions 
 to GCP Cloud Functions and later deletes two of them.
 A service account is needed for authentication to GCP and should be provided
 as json string via drone secrets. In the configuration below, the json of 
 the service account key file is stored in the drone secret called `token`.
+
+#### Deploying Cloud Functions
 
 Example `.drone.yml` file (drone.io 1.0 format):
 
@@ -105,3 +107,22 @@ make them available as `DB_PASSWORD` and `USER_API_KEY`. (env variable names wil
 Environment variables from secrets will be made available to *all* functions that you deploy within one drone step.
 If, for whatever reasons, this is not acceptable and you need to keep them separate then you have to use
 multiple drone steps, one for each function.
+
+
+#### Calling Cloud Functions
+
+You can also trigger a cloud function by using `call` as the action.
+Optionally, you can supply a json data string that will be passed to the function.
+
+```yaml
+  - name: call-cloud-function
+    image: oliver006/drone-gcf
+    settings:
+      action: call
+      functions:
+        - UpdateDatabase:
+          - data: '{"key": "value"}'
+    when:
+      event: tag
+
+```
