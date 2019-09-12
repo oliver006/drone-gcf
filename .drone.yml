@@ -143,19 +143,6 @@ steps:
         - push
 
 
-  # sleep 10 seconds to give the docker registry a few moments to ingest the new image
-  # so on the next step it hopefully will be downloaded and used
-  - name: sleep-10s
-    image: alpine
-    commands:
-      - sleep 10
-    when:
-      branch:
-        - master
-      event:
-        - push
-
-
   - name: delete-test-cloud-function
     image: "oliver006/drone-gcf:master"
     pull: true
