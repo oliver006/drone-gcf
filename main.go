@@ -180,6 +180,10 @@ func parseConfig() (*Config, error) {
 	}
 
 	switch cfg.Action {
+	case "call":
+		for _, f := range parseFunctions(os.Getenv("PLUGIN_FUNCTIONS"), cfg.Runtime) {
+			cfg.Functions = append(cfg.Functions, f)
+		}
 	case "deploy":
 		for _, f := range parseFunctions(os.Getenv("PLUGIN_FUNCTIONS"), cfg.Runtime) {
 			if isValidFunctionForDeploy(f) {
