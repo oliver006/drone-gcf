@@ -42,6 +42,7 @@ type Config struct {
 	Project    string
 	Token      string
 	Runtime    string
+	Verbose    bool
 	EnvSecrets []string
 	Functions  Functions
 }
@@ -152,6 +153,7 @@ func parseConfig() (*Config, error) {
 		Project: os.Getenv("PLUGIN_PROJECT"),
 		Runtime: os.Getenv("PLUGIN_RUNTIME"),
 		Token:   os.Getenv("PLUGIN_TOKEN"),
+		Verbose: os.Getenv("PLUGIN_VERBOSE") == "true",
 	}
 
 	if cfg.Action == "" {
@@ -204,7 +206,10 @@ func parseConfig() (*Config, error) {
 			return nil, fmt.Errorf("project id not found in token or param")
 		}
 	}
-	log.Printf("Using project ID: %s", cfg.Project)
+
+	if cfg.Verbose {
+		log.Printf("Using project ID: %s", cfg.Project)
+	}
 
 	return &cfg, nil
 }
@@ -341,11 +346,12 @@ func runConfig(cfg *Config) error {
 }
 
 type Env struct {
-	dir    string
-	env    []string
-	stdout io.Writer
-	stderr io.Writer
-	dryRun bool
+	dir     string
+	env     []string
+	stdout  io.Writer
+	stderr  io.Writer
+	dryRun  bool
+	verbose bool
 }
 
 func NewEnv(dir string, env []string, stdout, stderr io.Writer, dryRun bool) *Env {
@@ -359,7 +365,9 @@ func NewEnv(dir string, env []string, stdout, stderr io.Writer, dryRun bool) *En
 }
 
 func (e *Env) Run(name string, arg ...string) error {
-	log.Printf("Running: %s %#v", name, arg)
+	if e.verbose {
+		log.Printf("Running: %s %#v", name, arg)
+	}
 	if e.dryRun {
 		return nil
 	}
