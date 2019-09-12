@@ -143,22 +143,6 @@ steps:
         - push
 
 
-  - name: delete-test-cloud-function
-    image: "oliver006/drone-gcf:master"
-    pull: true
-    settings:
-      action: delete
-      functions: [TestDeployment]
-      token:
-        from_secret: token
-    when:
-      status: [ success, failure ]
-      branch:
-        - master
-      event:
-        - push
-
-
   - name: build-and-publish-tagged
     image: plugins/docker
     settings:
