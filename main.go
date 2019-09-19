@@ -42,7 +42,7 @@ type Config struct {
 	Project    string
 	Token      string
 	Runtime    string
-	Verbose    bool
+	Verbosity  string
 	EnvSecrets []string
 	Functions  Functions
 }
@@ -147,17 +147,20 @@ func getProjectFromToken(token string) string {
 
 func parseConfig() (*Config, error) {
 	cfg := Config{
-		Dir:     filepath.Join(os.Getenv("DRONE_WORKSPACE"), os.Getenv("PLUGIN_DIR")),
-		Action:  os.Getenv("PLUGIN_ACTION"),
-		DryRun:  os.Getenv("PLUGIN_DRY_RUN") == "true",
-		Project: os.Getenv("PLUGIN_PROJECT"),
-		Runtime: os.Getenv("PLUGIN_RUNTIME"),
-		Token:   os.Getenv("PLUGIN_TOKEN"),
-		Verbose: os.Getenv("PLUGIN_VERBOSE") == "true",
+		Dir:       filepath.Join(os.Getenv("DRONE_WORKSPACE"), os.Getenv("PLUGIN_DIR")),
+		Action:    os.Getenv("PLUGIN_ACTION"),
+		DryRun:    os.Getenv("PLUGIN_DRY_RUN") == "true",
+		Project:   os.Getenv("PLUGIN_PROJECT"),
+		Runtime:   os.Getenv("PLUGIN_RUNTIME"),
+		Token:     os.Getenv("PLUGIN_TOKEN"),
+		Verbosity: os.Getenv("PLUGIN_VERBOSITY"),
 	}
 
 	if cfg.Action == "" {
 		return nil, fmt.Errorf("Missing action")
+	}
+	if cfg.Verbosity == "" {
+		cfg.Verbosity = "warning"
 	}
 
 	PluginEnvSecretPrefix := "PLUGIN_ENV_SECRET_"
@@ -207,9 +210,7 @@ func parseConfig() (*Config, error) {
 		}
 	}
 
-	if cfg.Verbose {
-		log.Printf("Using project ID: %s", cfg.Project)
-	}
+	log.Printf("Using project ID: %s", cfg.Project)
 
 	return &cfg, nil
 }
@@ -226,6 +227,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 		"functions",
 		cfg.Action,
 		"--project", cfg.Project,
+		"--verbosity", cfg.Verbosity,
 	}
 
 	switch cfg.Action {

@@ -256,10 +256,10 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
 			},
 		},
 
@@ -279,7 +279,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
 			},
 		},
 
@@ -298,7 +298,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
 			},
 		},
 
@@ -317,7 +317,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
 			},
 		},
 
@@ -335,7 +335,7 @@ func TestExecutePlan(t *testing.T) {
 				},
 			},
 			expectedToBeOk: true,
-			expectedPlan:   [][]string{{"--quiet", "functions", "delete", "--project", "my-project-123", "ProcessEvents"}, {"--quiet", "functions", "delete", "--project", "my-project-123", "Func567", "--region", "us-east1"}},
+			expectedPlan:   [][]string{{"--quiet", "functions", "delete", "--project", "my-project-123", "--verbosity", "info", "ProcessEvents"}, {"--quiet", "functions", "delete", "--project", "my-project-123", "--verbosity", "info", "Func567", "--region", "us-east1"}},
 		},
 
 		{
@@ -343,7 +343,7 @@ func TestExecutePlan(t *testing.T) {
 				Action: "list",
 			},
 			expectedToBeOk: true,
-			expectedPlan:   [][]string{{"--quiet", "functions", "list", "--project", pId}},
+			expectedPlan:   [][]string{{"--quiet", "functions", "list", "--project", pId, "--verbosity", "info"}},
 		},
 
 		{
@@ -383,30 +383,28 @@ func TestExecutePlan(t *testing.T) {
 				},
 			},
 			expectedToBeOk: true,
-			expectedPlan:   [][]string{{"--quiet", "functions", "call", "--project", pId, "UpdateDatabase", "--data", `{"key": "value"}`}},
+			expectedPlan:   [][]string{{"--quiet", "functions", "call", "--project", pId, "--verbosity", "info", "UpdateDatabase", "--data", `{"key": "value"}`}},
 		},
 	} {
 		tst.cfg.Project = pId
+		tst.cfg.Verbosity = "info"
 		plan, err := CreateExecutionPlan(&tst.cfg)
 		if err != nil && tst.expectedToBeOk == true {
-			t.Errorf("CreateExecutionPlan(  %#v  ) failed, err: %s", tst, err)
-			return
+			t.Fatalf("CreateExecutionPlan(  %#v  ) failed, err: %s", tst, err)
 		}
 
 		if len(plan.Steps) != len(tst.expectedPlan) {
-			t.Errorf("not matching,\n\n   got: %#v              \nwanted: %#v", plan.Steps, tst.expectedPlan)
-			return
+			t.Fatalf("not matching,\n\n   got: %#v              \nwanted: %#v", plan.Steps, tst.expectedPlan)
 		}
 
 		for i := range plan.Steps {
 			if len(plan.Steps[i]) != len(tst.expectedPlan[i]) {
-				t.Errorf("not matching number of args,\n\n   got: %#v              \nwanted: %#v", plan.Steps[i], tst.expectedPlan[i])
-				return
+				t.Fatalf("not matching number of args,\n\n   got: %#v              \nwanted: %#v", plan.Steps[i], tst.expectedPlan[i])
 			}
 
 			for j := range plan.Steps[i] {
 				if plan.Steps[i][j] != tst.expectedPlan[i][j] {
-					t.Errorf("not matching args: %s    %s", plan.Steps[i][j], tst.expectedPlan[i][j])
+					t.Fatalf("not matching args: %s    %s", plan.Steps[i][j], tst.expectedPlan[i][j])
 				}
 			}
 		}
