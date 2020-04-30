@@ -65,6 +65,7 @@ func isValidRuntime(r string) bool {
 		"nodejs8":  true,
 		"python37": true,
 		"go111":    true,
+		"go113":    true,
 	}[r]
 }
 
