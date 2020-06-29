@@ -63,6 +63,7 @@ func isValidRuntime(r string) bool {
 	return map[string]bool{
 		"nodejs6":  true,
 		"nodejs8":  true,
+		"nodejs10":  true,
 		"python37": true,
 		"go111":    true,
 		"go113":    true,
