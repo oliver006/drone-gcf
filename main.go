@@ -292,10 +292,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 					}
 				}
 
-				// we're using ":|:" as the separator for the args
-				envStr := strings.Join(e, ":|:")
-				envStr = "^:|:^" + envStr
-				args = append(args, "--set-env-vars", envStr)
+				args = append(args, "--set-env-vars", strings.Join(e, ","))
 			}
 
 			res.Steps = append(res.Steps, args)
