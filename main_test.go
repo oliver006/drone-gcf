@@ -279,7 +279,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "ENV_SECRET_123=WUT,K=V"},
 			},
 		},
 
@@ -298,7 +298,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "K=V"},
 			},
 		},
 
@@ -317,7 +317,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "ENV_SECRET_123=WUT"},
 			},
 		},
 
