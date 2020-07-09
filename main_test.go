@@ -35,6 +35,7 @@ var (
 func TestParseFunctionsForDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"trigger\":\"http\"}]}]",
+		"[{\"TransferFile\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"true\"}]}]",
 		"[{\"TransferFile\":[{\"trigger\":\"http\",\"memory\":\"2048MB\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"gs://my-bucket\",\"memory\":\"512MB\"}]}]",
 		"[{\"Func654\":[{\"trigger\":\"topic\",\"trigger_resource\":\"topic/my-bucket\",\"memory\":\"512MB\"}]}]",
@@ -69,6 +70,7 @@ func TestParseFunctionsForDelete(t *testing.T) {
 func TestParseFunctionsforDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"t\":\"http\"}]}]",
+		"[{\"AllowNothing\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"maybe\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"\",\"memory\":\"512MB\"}]}]",
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"\",\"trigger_resource\":\"gs://bucket321\"}]}]",
 	} {
@@ -221,11 +223,12 @@ func TestExecutePlan(t *testing.T) {
 				Action: "deploy",
 				Functions: Functions{
 					{
-						Name:    "ProcessEvents",
-						Runtime: "go111",
-						Trigger: "http",
-						Memory:  "512MB",
-						Timeout: "20s",
+						Name:                 "ProcessEvents",
+						Runtime:              "go111",
+						Trigger:              "http",
+						Memory:               "512MB",
+						Timeout:              "20s",
+						AllowUnauthenticated: "true",
 					},
 					{
 						Name:            "ProcessPubSub",
@@ -256,7 +259,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--allow-unauthenticated", "--memory", "512MB", "--timeout", "20s"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
