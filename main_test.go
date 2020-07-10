@@ -35,8 +35,8 @@ var (
 func TestParseFunctionsForDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"trigger\":\"http\"}]}]",
-		"[{\"TransferFilePublic\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"true\"}]}]",
-		"[{\"TransferFilePrivate\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"false\"}]}]",
+		"[{\"TransferFilePublic\":[{\"trigger\":\"http\",\"allow_unauthenticated\":true}]}]",
+		"[{\"TransferFilePrivate\":[{\"trigger\":\"http\",\"allow_unauthenticated\":false}]}]",
 		"[{\"TransferFile\":[{\"trigger\":\"http\",\"memory\":\"2048MB\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"gs://my-bucket\",\"memory\":\"512MB\"}]}]",
 		"[{\"Func654\":[{\"trigger\":\"topic\",\"trigger_resource\":\"topic/my-bucket\",\"memory\":\"512MB\"}]}]",
@@ -71,7 +71,6 @@ func TestParseFunctionsForDelete(t *testing.T) {
 func TestParseFunctionsforDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"t\":\"http\"}]}]",
-		"[{\"AllowNothing\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"maybe\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"\",\"memory\":\"512MB\"}]}]",
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"\",\"trigger_resource\":\"gs://bucket321\"}]}]",
 	} {
@@ -229,7 +228,7 @@ func TestExecutePlan(t *testing.T) {
 						Trigger:              "http",
 						Memory:               "512MB",
 						Timeout:              "20s",
-						AllowUnauthenticated: "true",
+						AllowUnauthenticated: true,
 					},
 					{
 						Name:            "ProcessPubSub",
@@ -296,7 +295,7 @@ func TestExecutePlan(t *testing.T) {
 						Runtime:              "go111",
 						Trigger:              "http",
 						Memory:               "512MB",
-						AllowUnauthenticated: "false",
+						AllowUnauthenticated: false,
 						Environment:          []map[string]string{{"K": "V"}},
 					},
 				},
