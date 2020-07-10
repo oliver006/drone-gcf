@@ -71,7 +71,6 @@ func TestParseFunctionsForDelete(t *testing.T) {
 func TestParseFunctionsforDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"t\":\"http\"}]}]",
-		"[{\"AllowNothing\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"maybe\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"\",\"memory\":\"512MB\"}]}]",
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"\",\"trigger_resource\":\"gs://bucket321\"}]}]",
 	} {
