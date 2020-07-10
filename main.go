@@ -19,13 +19,14 @@ type Function struct {
 	TriggerEvent    string `json:"trigger_event"`
 	TriggerResource string `json:"trigger_resource"`
 
-	EntryPoint string `json:"entrypoint"`
-	Memory     string `json:"memory"`
-	Region     string `json:"region"`
-	Retry      string `json:"retry"`
-	Runtime    string `json:"runtime"`
-	Source     string `json:"source"`
-	Timeout    string `json:"timeout"`
+	AllowUnauthenticated string `json:"allow_unauthenticated"`
+	EntryPoint           string `json:"entrypoint"`
+	Memory               string `json:"memory"`
+	Region               string `json:"region"`
+	Retry                string `json:"retry"`
+	Runtime              string `json:"runtime"`
+	Source               string `json:"source"`
+	Timeout              string `json:"timeout"`
 
 	Environment []map[string]string `json:"environment"`
 
@@ -82,6 +83,11 @@ func isValidTriggerType(t string) bool {
 func isValidFunctionForDeploy(f Function) bool {
 	if !isValidRuntime(f.Runtime) {
 		log.Printf("Missing or invalid runtime [%s] for function: %s", f.Runtime, f.Name)
+		return false
+	}
+
+	if f.AllowUnauthenticated != "" && f.AllowUnauthenticated != "true" && f.AllowUnauthenticated != "false" {
+		log.Printf("Invalid value for the allow unauthenticated flag for function %s", f.Name)
 		return false
 	}
 
@@ -264,6 +270,9 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				args = append(args, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
 			}
 
+			if f.AllowUnauthenticated == "true" {
+				args = append(args, "--allow-unauthenticated")
+			}
 			if f.Source != "" {
 				args = append(args, "--source", f.Source)
 			}

@@ -8,10 +8,10 @@
 ### Overview
 
 The plugin supports deploying, listing, calling, and deleting of multiple functions at once.
-See below for an example drone.yml configuration that deploys several functions 
+See below for an example drone.yml configuration that deploys several functions
 to GCP Cloud Functions and later deletes two of them.
 A service account is needed for authentication to GCP and should be provided
-as json string via drone secrets. In the configuration below, the json of 
+as json string via drone secrets. In the configuration below, the json of
 the service account key file is stored in the drone secret called `token`.
 
 #### Deploying Cloud Functions
@@ -48,6 +48,7 @@ steps:
         - TransferFileToGCS:
           - trigger: http
             memory: 2048MB
+            allow_unauthenticated: true
             environment:
               - ENV_VAR: env_var_value_123
         - HandleEvents:
@@ -85,10 +86,12 @@ The plugin supports several types of Google Cloud Function triggers:
 
 See the output of `gcloud functions deploy --help` for more information regarding the setup of triggers.
 
+When deploying a function, there is the option to deploy as a public function. This can be configured by setting `allow_unauthenticated` to `true`. This adds the --allow-unauthenticated flag described [here](https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--allow-unauthenticated) to the deploy command. Any values besides `true` and `false` will cause an error.
+
 By default, the plugin will use the GCP project ID of the service account provided but you can override it
 by setting the `project` parameter.
 
-The runtime can be set on a per-function basis or for all functions at once. In the example above, the runtime 
+The runtime can be set on a per-function basis or for all functions at once. In the example above, the runtime
 is set to `go111` for all functions and then overwritten with `python37` for just `ProcessEmails`.
 This will result in the plugin deploying three functions, two in Golang and one in Python. \
 If no runtime setting is provided at all, the plugin will fail.
