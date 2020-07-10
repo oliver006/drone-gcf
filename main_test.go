@@ -35,7 +35,8 @@ var (
 func TestParseFunctionsForDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"trigger\":\"http\"}]}]",
-		"[{\"TransferFile\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"true\"}]}]",
+		"[{\"TransferFilePublic\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"true\"}]}]",
+		"[{\"TransferFilePrivate\":[{\"trigger\":\"http\",\"allow_unauthenticated\":\"false\"}]}]",
 		"[{\"TransferFile\":[{\"trigger\":\"http\",\"memory\":\"2048MB\"}]}]",
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"gs://my-bucket\",\"memory\":\"512MB\"}]}]",
 		"[{\"Func654\":[{\"trigger\":\"topic\",\"trigger_resource\":\"topic/my-bucket\",\"memory\":\"512MB\"}]}]",
@@ -291,11 +292,12 @@ func TestExecutePlan(t *testing.T) {
 				Action: "deploy",
 				Functions: Functions{
 					{
-						Name:        "ProcessEvents",
-						Runtime:     "go111",
-						Trigger:     "http",
-						Memory:      "512MB",
-						Environment: []map[string]string{{"K": "V"}},
+						Name:                 "ProcessEvents",
+						Runtime:              "go111",
+						Trigger:              "http",
+						Memory:               "512MB",
+						AllowUnauthenticated: "false",
+						Environment:          []map[string]string{{"K": "V"}},
 					},
 				},
 			},
