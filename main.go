@@ -87,6 +87,14 @@ func isValidFunctionForDeploy(f Function) bool {
 		return false
 	}
 
+<<<<<<< HEAD
+=======
+	if f.AllowUnauthenticated != "" && f.AllowUnauthenticated != "true" && f.AllowUnauthenticated != "false" {
+		log.Printf("Invalid value for the allow unauthenticated flag for function %s", f.Name)
+		return false
+	}
+
+>>>>>>> add option for false and updated readme
 	if f.Trigger == "http" {
 		return true
 	}
@@ -266,7 +274,11 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				args = append(args, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
 			}
 
+<<<<<<< HEAD
 			if f.AllowUnauthenticated == true {
+=======
+			if f.AllowUnauthenticated == "true" {
+>>>>>>> add option for false and updated readme
 				args = append(args, "--allow-unauthenticated")
 			}
 			if f.Source != "" {
