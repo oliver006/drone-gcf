@@ -19,7 +19,7 @@ type Function struct {
 	TriggerEvent    string `json:"trigger_event"`
 	TriggerResource string `json:"trigger_resource"`
 
-	AllowUnauthenticated string `json:"allow_unauthenticated"`
+	AllowUnauthenticated bool   `json:"allow_unauthenticated"`
 	EntryPoint           string `json:"entrypoint"`
 	Memory               string `json:"memory"`
 	Region               string `json:"region"`
@@ -271,7 +271,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				args = append(args, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
 			}
 
-			if f.AllowUnauthenticated == "true" {
+			if f.AllowUnauthenticated == true {
 				args = append(args, "--allow-unauthenticated")
 			}
 			if f.Source != "" {
