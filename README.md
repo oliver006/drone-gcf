@@ -86,11 +86,7 @@ The plugin supports several types of Google Cloud Function triggers:
 
 See the output of `gcloud functions deploy --help` for more information regarding the setup of triggers.
 
-<<<<<<< HEAD
 When deploying a function, there is the option to deploy as a public function. This can be configured by setting `allow_unauthenticated` to `true`. This adds the --allow-unauthenticated flag described [here](https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--allow-unauthenticated) to the deploy command. Please note that this expects a boolean value, either `true` or `false`.
-=======
-When deploying a function, there is the option to deploy as a public function. This can be configured by setting `allow_unauthenticated` to `true`. This adds the --allow-unauthenticated flag described [here](https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--allow-unauthenticated) to the deploy command. Any values besides `true` and `false` will cause an error.
->>>>>>> upstream/master
 
 By default, the plugin will use the GCP project ID of the service account provided but you can override it
 by setting the `project` parameter.
