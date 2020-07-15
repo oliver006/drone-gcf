@@ -65,6 +65,7 @@ steps:
       env_secret_api_key:
         from_secret: env_secret_api_key
       action: deploy
+      verbose: true
       token:
         from_secret: token
       functions:

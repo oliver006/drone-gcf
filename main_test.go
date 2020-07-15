@@ -283,7 +283,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "ENV_SECRET_123=WUT,K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
 			},
 		},
 
@@ -303,7 +303,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "K=V"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^K=V"},
 			},
 		},
 
@@ -322,7 +322,7 @@ func TestExecutePlan(t *testing.T) {
 			},
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
-				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "ENV_SECRET_123=WUT"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
 			},
 		},
 
@@ -409,7 +409,7 @@ func TestExecutePlan(t *testing.T) {
 
 			for j := range plan.Steps[i] {
 				if plan.Steps[i][j] != tst.expectedPlan[i][j] {
-					t.Fatalf("not matching args: %s    %s", plan.Steps[i][j], tst.expectedPlan[i][j])
+					t.Fatalf("not matching args, got [%s]   expected: [%s]", plan.Steps[i][j], tst.expectedPlan[i][j])
 				}
 			}
 		}
@@ -421,7 +421,7 @@ func TestEnvironRun(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 
-	e := NewEnv("/tmp", []string{"ABC=123"}, stdout, stderr, false)
+	e := NewEnv("/tmp", []string{"ABC=123"}, stdout, stderr, false, true)
 
 	if err := e.Run("/bin/echo", "sup"); err == nil {
 		if stdout.String() != "sup\n" {

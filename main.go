@@ -39,6 +39,7 @@ type Functions []Function
 type Config struct {
 	Action     string
 	DryRun     bool
+	Verbose    bool
 	Dir        string
 	Project    string
 	Token      string
@@ -301,7 +302,8 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 					}
 				}
 
-				args = append(args, "--set-env-vars", strings.Join(e, ","))
+				envStr := "^:|:^" + strings.Join(e, ":|:")
+				args = append(args, "--set-env-vars", envStr)
 			}
 
 			res.Steps = append(res.Steps, args)
@@ -342,7 +344,7 @@ func runConfig(cfg *Config) error {
 		return err
 	}
 
-	e := NewEnv(cfg.Dir, os.Environ(), os.Stdout, os.Stderr, cfg.DryRun)
+	e := NewEnv(cfg.Dir, os.Environ(), os.Stdout, os.Stderr, cfg.DryRun, cfg.Verbose)
 
 	if err := e.Run("gcloud", "version"); err != nil {
 		return fmt.Errorf("error: %s\n", err)
@@ -364,13 +366,14 @@ type Env struct {
 	verbose bool
 }
 
-func NewEnv(dir string, env []string, stdout, stderr io.Writer, dryRun bool) *Env {
+func NewEnv(dir string, env []string, stdout, stderr io.Writer, dryRun bool, verbose bool) *Env {
 	return &Env{
-		dir:    dir,
-		env:    env,
-		stdout: stdout,
-		stderr: stderr,
-		dryRun: dryRun,
+		dir:     dir,
+		env:     env,
+		stdout:  stdout,
+		stderr:  stderr,
+		dryRun:  dryRun,
+		verbose: verbose,
 	}
 }
 
