@@ -1,9 +1,11 @@
 kind: pipeline
 name: default
 
+
 workspace:
   base: /go
   path: src/github.com/oliver006/drone-gcf
+
 
 steps:
   - name: test
@@ -23,6 +25,67 @@ steps:
         - push
 
 
+  - name: build-and-publish-master
+    image: plugins/docker
+    settings:
+      tags: master
+      dockerfile: ./Dockerfile
+      repo: oliver006/drone-gcf
+      target: release
+      debug: true
+      build_args:
+        - 'TAG=master'
+        - 'SHA1=${DRONE_COMMIT_SHA}'
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: sleep-10s
+    image: alpine
+    commands:
+      - sleep 10
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
+  - name: deploy-cloud-function-master
+    image: "oliver006/drone-gcf:master"
+    pull: true
+    settings:
+      env_secret_api_key:
+        from_secret: env_secret_api_key
+      action: deploy
+      token:
+        from_secret: token
+      functions:
+        - TestDeployment:
+          - trigger: http
+            memory: 128MB
+            runtime: go111
+            source: ./test-function/
+            environment:
+              - REGULAR_ENV_VAR: env_var_123
+                BUILD_HASH: "${DRONE_COMMIT_SHA}"
+                ENV_VAR_WITH_SPACE: "oh noes"
+                ENV_VAR_WITH_QUOTES: 'oh " my'
+                ENV_VAR_WITH_COMMA: 'oh , well'
+    when:
+      branch:
+        - master
+      event:
+        - push
+
+
   - name: build-and-publish-tagged
     image: plugins/docker
     settings:
@@ -31,6 +94,9 @@ steps:
       repo: oliver006/drone-gcf
       target: release
       debug: true
+      build_args:
+        - 'TAG=${DRONE_TAG}'
+        - 'SHA1=${DRONE_COMMIT_SHA}'
       username:
         from_secret: docker_username
       password:
@@ -38,3 +104,4 @@ steps:
     when:
       event:
         - tag
+
