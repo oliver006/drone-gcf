@@ -20,9 +20,6 @@ steps:
       - "go test -v -covermode=atomic -cover -race -coverprofile=coverage.txt"
       - "go get github.com/mattn/goveralls"
       - "/go/bin/goveralls -v -coverprofile=coverage.txt -service=drone.io"
-    when:
-      event:
-        - push
 
 
   - name: build-and-publish-master
