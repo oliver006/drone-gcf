@@ -2,7 +2,7 @@
 
 ## Drone-GCF - a Drone.io plugin to deploy Google Cloud Functions
 
-![](https://cloud.google.com/_static/images/cloud/products/logos/svg/functions.svg)
+![](google-cloud-functions.svg)
 
 
 ### Overview
