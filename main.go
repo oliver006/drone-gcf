@@ -90,11 +90,6 @@ func isValidFunctionForDeploy(f Function) bool {
 		return false
 	}
 
-	if f.AllowUnauthenticated != "" && f.AllowUnauthenticated != "true" && f.AllowUnauthenticated != "false" {
-		log.Printf("Invalid value for the allow unauthenticated flag for function %s", f.Name)
-		return false
-	}
-
 	if f.Trigger == "http" {
 		return true
 	}
