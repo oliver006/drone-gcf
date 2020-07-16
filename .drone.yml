@@ -69,7 +69,7 @@ steps:
         - TestDeployment:
           - trigger: http
             memory: 128MB
-            runtime: go111
+            runtime: go113
             source: ./test-function/
             environment:
               - REGULAR_ENV_VAR: env_var_123
