@@ -28,6 +28,7 @@ type Function struct {
 	Source               string `json:"source"`
 	Timeout              string `json:"timeout"`
 
+	EnvironmentDelimiter string `json:"environment_delimiter"`
 	Environment []map[string]string `json:"environment"`
 
 	// used for action==call
@@ -300,8 +301,12 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 					}
 				}
 
-				envStr := "^:|:^" + strings.Join(e, ":|:")
-				args = append(args, "--set-env-vars", envStr)
+				envsDelimiter := ":|:"
+        if f.EnvironmentDelimiter != "" {
+          envsDelimiter = f.EnvironmentDelimiter
+        }
+        envStr := envsDelimiter + strings.Join(e, envsDelimiter)
+        args = append(args, "--set-env-vars", envStr)
 			}
 
 			res.Steps = append(res.Steps, args)
