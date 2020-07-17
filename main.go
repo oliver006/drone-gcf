@@ -302,11 +302,11 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				}
 
 				envsDelimiter := ":|:"
-        if f.EnvironmentDelimiter != "" {
-          envsDelimiter = f.EnvironmentDelimiter
-        }
-        envStr := envsDelimiter + strings.Join(e, envsDelimiter)
-        args = append(args, "--set-env-vars", envStr)
+				if f.EnvironmentDelimiter != "" {
+					envsDelimiter = f.EnvironmentDelimiter
+				}
+				envStr := envsDelimiter + strings.Join(e, envsDelimiter)
+				args = append(args, "--set-env-vars", envStr)
 			}
 
 			res.Steps = append(res.Steps, args)
