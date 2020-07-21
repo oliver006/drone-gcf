@@ -276,6 +276,7 @@ func TestExecutePlan(t *testing.T) {
 						Runtime:     "go111",
 						Trigger:     "http",
 						Memory:      "512MB",
+						EnvironmentDelimiter:	":|:",
 						Environment: []map[string]string{{"K": "V"}},
 					},
 				},
@@ -283,6 +284,27 @@ func TestExecutePlan(t *testing.T) {
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT:|:K=V"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action:     "deploy",
+				EnvSecrets: []string{"ENV_SECRET_123=WUT"},
+				Functions: Functions{
+					{
+						Name:        					"ProcessEvents",
+						Runtime:     					"go111",
+						Trigger:     					"http",
+						Memory:      					"512MB",
+						EnvironmentDelimiter:	"~%~",
+						Environment: 					[]map[string]string{{"K": "V"}},
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^~%~^ENV_SECRET_123=WUT~%~K=V"},
 			},
 		},
 
@@ -296,6 +318,7 @@ func TestExecutePlan(t *testing.T) {
 						Trigger:              "http",
 						Memory:               "512MB",
 						AllowUnauthenticated: false,
+						EnvironmentDelimiter:	":|:",
 						Environment:          []map[string]string{{"K": "V"}},
 					},
 				},
@@ -316,6 +339,7 @@ func TestExecutePlan(t *testing.T) {
 						Runtime: "go111",
 						Trigger: "http",
 						Memory:  "512MB",
+						EnvironmentDelimiter:	":|:",
 					},
 				},
 			},

@@ -53,6 +53,7 @@ type Config struct {
 const (
 	// location of temp key file within the ephemeral drone container that runs drone-gcf
 	TmpTokenFileLocation = "/tmp/token.json"
+	defaultEnvVarDelimiter = ":|:"
 )
 
 var (
@@ -135,6 +136,9 @@ func parseFunctions(e string, defaultRuntime string) []Function {
 				if f.Runtime == "" {
 					f.Runtime = defaultRuntime
 				}
+				if f.EnvironmentDelimiter == "" {
+					f.EnvironmentDelimiter = defaultEnvVarDelimiter
+				} 
 				res = append(res, f)
 			}
 		}
@@ -301,11 +305,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 					}
 				}
 
-				envsDelimiter := ":|:"
-				if f.EnvironmentDelimiter != "" {
-					envsDelimiter = f.EnvironmentDelimiter
-				}
-				envStr := envsDelimiter + strings.Join(e, envsDelimiter)
+				envStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
 				args = append(args, "--set-env-vars", envStr)
 			}
 
