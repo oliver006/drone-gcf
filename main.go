@@ -28,8 +28,8 @@ type Function struct {
 	Source               string `json:"source"`
 	Timeout              string `json:"timeout"`
 
-	EnvironmentDelimiter string `json:"environment_delimiter"`
-	Environment []map[string]string `json:"environment"`
+	EnvironmentDelimiter string              `json:"environment_delimiter"`
+	Environment          []map[string]string `json:"environment"`
 
 	// used for action==call
 	Data string
@@ -52,7 +52,7 @@ type Config struct {
 
 const (
 	// location of temp key file within the ephemeral drone container that runs drone-gcf
-	TmpTokenFileLocation = "/tmp/token.json"
+	TmpTokenFileLocation   = "/tmp/token.json"
 	defaultEnvVarDelimiter = ":|:"
 )
 
@@ -138,7 +138,7 @@ func parseFunctions(e string, defaultRuntime string) []Function {
 				}
 				if f.EnvironmentDelimiter == "" {
 					f.EnvironmentDelimiter = defaultEnvVarDelimiter
-				} 
+				}
 				res = append(res, f)
 			}
 		}
