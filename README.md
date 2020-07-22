@@ -111,6 +111,10 @@ Environment variables from secrets will be made available to *all* functions tha
 If, for whatever reasons, this is not acceptable and you need to keep them separate then you have to use
 multiple drone steps, one for each function.
 
+If you run into issues when setting environment variables with special characters in their values, there's a setting
+you can use to specify a *delimiter string* to be used as separation between variables. Normally, `gcloud` would use a
+comma (*,*), but we've set the default to something more unlikely to cause any issue (*:|:*). If you still need to change
+it, you can use the *environment_delimiter* setting.
 
 #### Calling Cloud Functions
 
