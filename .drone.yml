@@ -14,12 +14,7 @@ steps:
       COVERALLS_TOKEN:
         from_secret: coveralls-token
     commands:
-      - 'echo " ! gofmt -d *.go 2>&1 | read " | bash'
-      - 'go vet ./...'
-      - "go build"
-      - "go test -v -covermode=atomic -cover -race -coverprofile=coverage.txt"
-      - "go get github.com/mattn/goveralls"
-      - "/go/bin/goveralls -v -coverprofile=coverage.txt -service=drone.io"
+      - "make drone-tests"
 
 
   - name: build-and-publish-master
