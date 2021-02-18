@@ -1,4 +1,4 @@
-FROM golang:1.14 as builder
+FROM golang:1.16 as builder
 WORKDIR /go/src/github.com/oliver006/drone-gcf
 
 ARG SHA1
@@ -12,7 +12,7 @@ RUN BUILD_DATE=$(date +%F-%T) && CGO_ENABLED=0 GOOS=linux go build -o drone-gcf 
 RUN ./drone-gcf -v
 
 
-FROM       google/cloud-sdk:290.0.1-slim as release
+FROM       gcr.io/google.com/cloudsdktool/cloud-sdk:328.0.0-slim as release
 RUN        apt-get -y install ca-certificates
 COPY       --from=builder /go/src/github.com/oliver006/drone-gcf/drone-gcf /bin/drone-gcf
 ENTRYPOINT /bin/drone-gcf

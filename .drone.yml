@@ -9,7 +9,7 @@ workspace:
 
 steps:
   - name: test
-    image: "golang:1.14"
+    image: "golang:1.16"
     environment:
       COVERALLS_TOKEN:
         from_secret: coveralls-token
@@ -40,7 +40,7 @@ steps:
 
 
   - name: sleep-10s
-    image: alpine
+    image: "golang:1.16"
     commands:
       - sleep 10
     when:
