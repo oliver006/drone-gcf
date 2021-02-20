@@ -191,9 +191,8 @@ func parseConfig() (*Config, error) {
 		}
 	}
 
-	defaultRuntime := os.Getenv("PLUGIN_RUNTIME")
-	if defaultRuntime == "" {
-		defaultRuntime = "go111"
+	if cfg.Runtime == "" {
+		cfg.Runtime = "go111"
 	}
 
 	switch cfg.Action {
