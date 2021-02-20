@@ -19,6 +19,14 @@ upload-coverage:
 build:
 	go build .
 
+.PHONY: lint
+lint:
+        #
+        # this will run the default linters on non-test files
+        # and then all but the "errcheck" linters on the tests
+	golangci-lint run --tests=false --exclude-use-default
+	golangci-lint run -D=errcheck   --exclude-use-default
+
 
 .PHONE: drone-tests
 drone-tests: test build checks upload-coverage
