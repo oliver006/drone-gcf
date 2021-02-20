@@ -274,7 +274,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				args = append(args, "--trigger-event", f.TriggerEvent, "--trigger-resource="+f.TriggerResource)
 			}
 
-			if f.AllowUnauthenticated == true {
+			if f.AllowUnauthenticated {
 				args = append(args, "--allow-unauthenticated")
 			}
 			if f.Source != "" {
