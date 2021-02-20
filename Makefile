@@ -3,8 +3,8 @@ test:
 	go test -v -covermode=atomic -cover -race -coverprofile=coverage.txt .
 
 
-.PHONY: checks
-checks:
+.PHONY: vet
+vet:
 	echo " ! gofmt -d *.go 2>&1 | read " | bash
 	go vet ./...
 
@@ -19,6 +19,7 @@ upload-coverage:
 build:
 	go build .
 
+
 .PHONY: lint
 lint:
         #
@@ -28,5 +29,5 @@ lint:
 	golangci-lint run -D=errcheck   --exclude-use-default
 
 
-.PHONE: drone-tests
-drone-tests: test build checks upload-coverage
+.PHONY: drone-tests
+drone-tests: test build vet upload-coverage
