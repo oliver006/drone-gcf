@@ -17,6 +17,19 @@ steps:
       - "make drone-tests"
 
 
+  - name: lint
+    image: golangci/golangci-lint:latest-alpine
+    pull: always
+    commands:
+      - apk add --update make
+      - make lint
+    when:
+      event:
+        - pull_request
+        - push
+        - tag
+
+
   - name: build-and-publish-master
     image: plugins/docker
     settings:
