@@ -458,7 +458,7 @@ func TestEnvironRun(t *testing.T) {
 	}
 
 	if err := e.Run("/usr/bin/env"); err == nil {
-		if strings.Index(stdout.String(), "ABC=123") == -1 {
+		if !strings.Contains(stdout.String(), "ABC=123") {
 			t.Errorf("didn't find ABC in Env, got: %s", stdout.String())
 		}
 	} else {
