@@ -255,6 +255,14 @@ func TestExecutePlan(t *testing.T) {
 						TriggerEvent:    "my.event",
 						EntryPoint:      "FuncEntryPoint",
 					},
+					{
+						Name:           "ProcessEventsWithDifferentSA",
+						Runtime:        "nodejs10",
+						Trigger:        "http",
+						Memory:         "512MB",
+						Timeout:        "20s",
+						ServiceAccount: "account@project.iam.gserviceaccount.com",
+					},
 				},
 			},
 			expectedToBeOk: true,
@@ -263,6 +271,7 @@ func TestExecutePlan(t *testing.T) {
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEventsWithDifferentSA", "--runtime", "nodejs10", "--trigger-http", "--memory", "512MB", "--timeout", "20s", "--service-account", "account@project.iam.gserviceaccount.com"},
 			},
 		},
 
