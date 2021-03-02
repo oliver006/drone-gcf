@@ -27,6 +27,7 @@ type Function struct {
 	Runtime              string `json:"runtime"`
 	Source               string `json:"source"`
 	Timeout              string `json:"timeout"`
+	ServiceAccount       string `json:"serviceaccount"`
 
 	EnvironmentDelimiter string              `json:"environment_delimiter"`
 	Environment          []map[string]string `json:"environment"`
@@ -293,6 +294,9 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 			}
 			if f.Timeout != "" {
 				args = append(args, "--timeout", f.Timeout)
+			}
+			if f.ServiceAccount != "" {
+				args = append(args, "--service-account", f.ServiceAccount)
 			}
 			if len(cfg.EnvSecrets) > 0 || len(f.Environment) > 0 {
 				e := make([]string, len(cfg.EnvSecrets))
