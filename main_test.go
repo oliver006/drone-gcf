@@ -272,6 +272,7 @@ func TestExecutePlan(t *testing.T) {
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEventsWithDifferentSA", "--runtime", "nodejs10", "--trigger-http", "--memory", "512MB", "--timeout", "20s", "--service-account", "account@project.iam.gserviceaccount.com"},
+			},
 		},
 
 		{
