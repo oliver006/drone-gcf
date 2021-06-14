@@ -31,7 +31,7 @@ type Function struct {
 
 	EnvironmentDelimiter string              `json:"environment_delimiter"`
 	Environment          []map[string]string `json:"environment"`
-	EnvironmentFile		 string `json:"env_vars_file"`
+	EnvironmentFile      string              `json:"env_vars_file"`
 	// used for action==call
 	Data string
 }
@@ -311,7 +311,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				envStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
 				args = append(args, "--set-env-vars", envStr)
 			}
-			if (f.EnvironmentFile != ""){
+			if f.EnvironmentFile != "" {
 				args = append(args, "--env-vars-file", f.EnvironmentFile)
 			}
 
