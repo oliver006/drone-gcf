@@ -327,6 +327,46 @@ func TestExecutePlan(t *testing.T) {
 						Trigger:              "http",
 						Memory:               "512MB",
 						AllowUnauthenticated: false,
+						EnvironmentVarsFile:  ".env.yaml",
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--env-vars-file"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:                 "ProcessEvents",
+						Runtime:              "go111",
+						Trigger:              "http",
+						Memory:               "512MB",
+						AllowUnauthenticated: false,
+						VpcConnector:         "vpc-connector",
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--vpc-connector"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:                 "ProcessEvents",
+						Runtime:              "go111",
+						Trigger:              "http",
+						Memory:               "512MB",
+						AllowUnauthenticated: false,
 						EnvironmentDelimiter: ":|:",
 						Environment:          []map[string]string{{"K": "V"}},
 					},
