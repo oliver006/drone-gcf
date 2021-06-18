@@ -33,7 +33,7 @@ type Function struct {
 	EnvironmentDelimiter string              `json:"environment_delimiter"`
 	Environment          []map[string]string `json:"environment"`
 
-	EnvironmentVarsFile string `json:"envvarsfile"`
+	EnvironmentVarsFile string `json:"env_vars_file"`
 	// used for action==call
 	Data string
 }
