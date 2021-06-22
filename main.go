@@ -28,10 +28,12 @@ type Function struct {
 	Source               string `json:"source"`
 	Timeout              string `json:"timeout"`
 	ServiceAccount       string `json:"serviceaccount"`
+	VpcConnector         string `json:"vpcconnector"`
 
 	EnvironmentDelimiter string              `json:"environment_delimiter"`
 	Environment          []map[string]string `json:"environment"`
 
+	EnvironmentVarsFile string `json:"env_vars_file"`
 	// used for action==call
 	Data string
 }
@@ -310,6 +312,12 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 
 				envStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
 				args = append(args, "--set-env-vars", envStr)
+			}
+			if f.EnvironmentVarsFile != "" {
+				args = append(args, "--env-vars-file", f.EnvironmentVarsFile)
+			}
+			if f.VpcConnector != "" {
+				args = append(args, "--vpc-connector", f.VpcConnector)
 			}
 
 			res.Steps = append(res.Steps, args)

@@ -60,6 +60,9 @@ steps:
             memory: 512MB
             runtime: python37
             source: ./python/src/functions/
+            vpcconnector: vpc-connector
+            env_vars_file: ".env.yaml"
+
 
     when:
       event: push
