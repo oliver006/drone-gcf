@@ -18,7 +18,7 @@ steps:
 
 
   - name: lint
-    image: golangci/golangci-lint:latest-alpine
+    image: golangci/golangci-lint@sha256:39e13a431c69fca37f88ab4b2340655eef7d7d18373df10d5e737f0b77866747
     pull: always
     commands:
       - apk add --update make
