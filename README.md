@@ -62,7 +62,13 @@ steps:
             source: ./python/src/functions/
             vpcconnector: vpc-connector
             env_vars_file: ".env.yaml"
-
+        - ProcessSecrets:
+            - trigger: http
+              runtime: python37
+              source: ./python/src/functions/
+              secrets:
+                /mnt/path: gcpsm_secrets:latest
+                TO_SECRET: gcpcm_top_secret:1
 
     when:
       event: push
@@ -101,9 +107,10 @@ If no runtime setting is provided at all, the plugin will fail.
 
 Similarly, you can set the `source` location of each function in case you keep the code in separate folders.
 
-There are two ways to set environment variables when deploying cloud functions:
+There are three ways to set environment variables when deploying cloud functions:
 - from a secret
 - putting the value directly into the drone.yml file
+- Google Secret Manager
 
 To pull in an environment variable value from a secret, add an entry to the settings that starts
 with `env_secret_` followed by the name as which the variable will be made available to the cloud function.
