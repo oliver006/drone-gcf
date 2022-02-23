@@ -41,6 +41,8 @@ func TestParseFunctionsForDeploy(t *testing.T) {
 		"[{\"HeyNow123\":[{\"trigger\":\"bucket\",\"trigger_resource\":\"gs://my-bucket\",\"memory\":\"512MB\"}]}]",
 		"[{\"Func654\":[{\"trigger\":\"topic\",\"trigger_resource\":\"topic/my-bucket\",\"memory\":\"512MB\"}]}]",
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"providers/cloud.storage/eventTypes/object.change\",\"trigger_resource\":\"gs://bucket321\"}]}]",
+		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"providers/cloud.storage/eventTypes/object.change\",\"trigger_resource\":\"gs://bucket321\"}]}]",
+		"[{\"FuncSecret\":[{\"trigger\":\"http\",\"secrets\":{\"/mount/path\":\"top_secret\",\"ENV_VAR\":\"top_secret\"}}]}]",
 	} {
 		functions := parseFunctions(tst, "go111")
 		if len(functions) == 0 {
@@ -395,6 +397,25 @@ func TestExecutePlan(t *testing.T) {
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--memory", "512MB", "--set-env-vars", "^:|:^ENV_SECRET_123=WUT"},
+			},
+		},
+
+		{
+			cfg: Config{
+				Action: "deploy",
+				Functions: Functions{
+					{
+						Name:                 "SecretEvents",
+						Runtime:              "go111",
+						Trigger:              "http",
+						EnvironmentDelimiter: ":|:",
+						Secrets:              map[string]string{"/mnt/path": "top_secret:1"},
+					},
+				},
+			},
+			expectedToBeOk: true,
+			expectedPlan: [][]string{
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "SecretEvents", "--runtime", "go111", "--trigger-http", "--set-secrets", "^:|:^/mnt/path=top_secret:1"},
 			},
 		},
 

@@ -327,7 +327,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				}
 
 				secretsStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
-				args = append(args, "--set secrets", secretsStr)
+				args = append(args, "--set-secrets", secretsStr)
 
 			}
 
