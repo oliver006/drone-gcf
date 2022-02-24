@@ -32,6 +32,7 @@ type Function struct {
 
 	EnvironmentDelimiter string              `json:"environment_delimiter"`
 	Environment          []map[string]string `json:"environment"`
+	Secrets              map[string]string   `json:"secrets"`
 
 	EnvironmentVarsFile string `json:"env_vars_file"`
 	// used for action==call
@@ -318,6 +319,15 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 			}
 			if f.VpcConnector != "" {
 				args = append(args, "--vpc-connector", f.VpcConnector)
+			}
+			if len(f.Secrets) > 0 {
+				e := make([]string, 0)
+				for k, v := range f.Secrets {
+					e = append(e, fmt.Sprintf(`%s=%s`, k, v))
+				}
+
+				secretsStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
+				args = append(args, "--set-secrets", secretsStr)
 			}
 
 			res.Steps = append(res.Steps, args)

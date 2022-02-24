@@ -62,7 +62,13 @@ steps:
             source: ./python/src/functions/
             vpcconnector: vpc-connector
             env_vars_file: ".env.yaml"
-
+        - ProcessSecrets:
+            - trigger: http
+              runtime: python37
+              source: ./python/src/functions/
+              secrets:
+                /mnt/path: gcpsm_secrets:latest
+                TOP_SECRET: gcpsm_top_secret:1
 
     when:
       event: push
@@ -101,9 +107,10 @@ If no runtime setting is provided at all, the plugin will fail.
 
 Similarly, you can set the `source` location of each function in case you keep the code in separate folders.
 
-There are two ways to set environment variables when deploying cloud functions:
+There are three ways to set environment variables when deploying cloud functions:
 - from a secret
 - putting the value directly into the drone.yml file
+- Google Secret Manager
 
 To pull in an environment variable value from a secret, add an entry to the settings that starts
 with `env_secret_` followed by the name as which the variable will be made available to the cloud function.
@@ -118,6 +125,11 @@ If you run into issues when setting environment variables with special character
 you can use to specify a *delimiter string* to be used as separation between variables. Normally, `gcloud` would use a
 comma (*,*), but we've set the default to something more unlikely to cause any issue (*:|:*). If you still need to change
 it, you can use the *environment_delimiter* setting.
+
+Using [Google Secret Manager](https://cloud.google.com/functions/docs/configuring/secrets#gcloud) allows two ways to make secret available to the functions.
+
+- Mounting a secret as a volume, making it available as a file. `/mnt/secrets: gcpsm_secret:latest`, where the key is the mount point, and the value is the secret name followed by the version.
+- As an environment variable. `ENV_NAME: gcpsm_secret:1`, where the key is the name of the variable and the value is the secret name followed by the version.
 
 #### Calling Cloud Functions
 
