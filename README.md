@@ -68,7 +68,7 @@ steps:
               source: ./python/src/functions/
               secrets:
                 /mnt/path: gcpsm_secrets:latest
-                TO_SECRET: gcpcm_top_secret:1
+                TOP_SECRET: gcpsm_top_secret:1
 
     when:
       event: push
@@ -125,6 +125,11 @@ If you run into issues when setting environment variables with special character
 you can use to specify a *delimiter string* to be used as separation between variables. Normally, `gcloud` would use a
 comma (*,*), but we've set the default to something more unlikely to cause any issue (*:|:*). If you still need to change
 it, you can use the *environment_delimiter* setting.
+
+Using [Google Secret Manager](https://cloud.google.com/functions/docs/configuring/secrets#gcloud) allows two ways to make secret available to the functions.
+
+- Mounting a secret as a volume, making it available as a file. `/mnt/secrets: gcpsm_secret:latest`, where the key is the mount point, and the value is the secret name followed by the version.
+- As an environment variable. `ENV_NAME: gcpsm_secret:1`, where the key is the name of the variable and the value is the secret name followed by the version.
 
 #### Calling Cloud Functions
 
