@@ -43,6 +43,8 @@ func TestParseFunctionsForDeploy(t *testing.T) {
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"providers/cloud.storage/eventTypes/object.change\",\"trigger_resource\":\"gs://bucket321\"}]}]",
 		"[{\"FuncNew\":[{\"trigger\":\"event\",\"trigger_event\":\"providers/cloud.storage/eventTypes/object.change\",\"trigger_resource\":\"gs://bucket321\"}]}]",
 		"[{\"FuncSecret\":[{\"trigger\":\"http\",\"secrets\":{\"/mount/path\":\"top_secret\",\"ENV_VAR\":\"top_secret\"}}]}]",
+		"[{\"FuncIngress\":[{\"trigger\":\"http\",\"ingress_settings\":\"internal-only\"}]}]",
+		"[{\"FuncEgress\":[{\"trigger\":\"http\",\"egress_settings\":\"all\"}]}]",
 	} {
 		functions := parseFunctions(tst, "go111")
 		if len(functions) == 0 {
@@ -173,6 +175,16 @@ func TestParseConfig(t *testing.T) {
 		{
 			expectedToBeOk: false,
 			Env:            map[string]string{"PLUGIN_ACTION": "deploy", "TOOOOOOOOOOKEN": invalidGCPKey},
+		},
+		{
+			expectedToBeOk:    true,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"go111\",\"memory\":\"2048MB\", \"ingress_settings\":\"all\"}]}]"},
+			expectedProjectId: "my-project-id",
+		},
+		{
+			expectedToBeOk:    false,
+			Env:               map[string]string{"PLUGIN_ACTION": "deploy", "PLUGIN_TOKEN": validGCPKey, "PLUGIN_FUNCTIONS": "[{\"TransferFile\":[{\"trigger\":\"http\",\"runtime\":\"go111\",\"memory\":\"2048MB\", \"ingress_settings\":\"invalid\"}]}]"},
+			expectedProjectId: "my-project-id",
 		},
 	} {
 		os.Clearenv()
