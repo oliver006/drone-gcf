@@ -37,6 +37,9 @@ type Function struct {
 	EnvironmentVarsFile string `json:"env_vars_file"`
 	// used for action==call
 	Data string
+
+	IngressSettings string `json:"ingress_settings"`
+	EgressSettings  string `json:"egress_settings"`
 }
 
 type Functions []Function
@@ -91,9 +94,34 @@ func isValidTriggerType(t string) bool {
 	}[t]
 }
 
+func isValidIngressSettings(s string) bool {
+	return map[string]bool{
+		"all":               true,
+		"internal-only":     true,
+		"internal-and-gclb": true,
+	}[s]
+}
+
+func isValidEgressSettings(s string) bool {
+	return map[string]bool{
+		"all":                 true,
+		"private-ranges-only": true,
+	}[s]
+}
+
 func isValidFunctionForDeploy(f Function) bool {
 	if !isValidRuntime(f.Runtime) {
 		log.Printf("Missing or invalid runtime [%s] for function: %s", f.Runtime, f.Name)
+		return false
+	}
+
+	if f.IngressSettings != "" && !isValidIngressSettings(f.IngressSettings) {
+		log.Printf("Invalid ingress settings for function %s", f.Name)
+		return false
+	}
+
+	if f.EgressSettings != "" && !isValidEgressSettings(f.EgressSettings) {
+		log.Printf("Invalid egress settings settings for function %s", f.Name)
 		return false
 	}
 
@@ -329,6 +357,14 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 
 				secretsStr := "^" + f.EnvironmentDelimiter + "^" + strings.Join(e, f.EnvironmentDelimiter)
 				args = append(args, "--set-secrets", secretsStr)
+			}
+
+			if f.IngressSettings != "" {
+				args = append(args, "--ingress-settings", f.IngressSettings)
+			}
+
+			if f.EgressSettings != "" {
+				args = append(args, "--egress-settings", f.EgressSettings)
 			}
 
 			res.Steps = append(res.Steps, args)
