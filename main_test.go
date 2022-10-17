@@ -35,6 +35,7 @@ var (
 func TestParseFunctionsForDeploy(t *testing.T) {
 	for _, tst := range []string{
 		"[{\"TransferFile\":[{\"trigger\":\"http\"}]}]",
+		"[{\"TransferFileGen2\":[{\"trigger\":\"http\",\"gen2\":true}]}]",
 		"[{\"TransferFilePublic\":[{\"trigger\":\"http\",\"allow_unauthenticated\":true}]}]",
 		"[{\"TransferFilePrivate\":[{\"trigger\":\"http\",\"allow_unauthenticated\":false}]}]",
 		"[{\"TransferFile\":[{\"trigger\":\"http\",\"memory\":\"2048MB\"}]}]",
@@ -245,6 +246,14 @@ func TestExecutePlan(t *testing.T) {
 						AllowUnauthenticated: true,
 					},
 					{
+						Name:    "ProcessEvents",
+						Runtime: "go111",
+						Trigger: "http",
+						Memory:  "512MB",
+						Timeout: "20s",
+						Gen2:    true,
+					},
+					{
 						Name:            "ProcessPubSub",
 						Runtime:         "python37",
 						Trigger:         "topic",
@@ -282,6 +291,7 @@ func TestExecutePlan(t *testing.T) {
 			expectedToBeOk: true,
 			expectedPlan: [][]string{
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--allow-unauthenticated", "--memory", "512MB", "--timeout", "20s"},
+				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessEvents", "--runtime", "go111", "--trigger-http", "--gen2", "--memory", "512MB", "--timeout", "20s"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessPubSub", "--runtime", "python37", "--trigger-topic", "topic/emails/filtered", "--memory", "2048MB", "--timeout", "20s"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessNews", "--runtime", "go111", "--trigger-bucket", "gs://bucket/files/cool", "--source", "src/", "--region", "us-east1", "--retry", "3"},
 				{"--quiet", "functions", "deploy", "--project", pId, "--verbosity", "info", "ProcessMoreEvents", "--runtime", "go111", "--trigger-event", "my.event", "--trigger-resource=my.trigger.resource", "--entry-point", "FuncEntryPoint"},
