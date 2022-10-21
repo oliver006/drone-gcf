@@ -20,6 +20,7 @@ type Function struct {
 	TriggerResource string `json:"trigger_resource"`
 
 	AllowUnauthenticated bool   `json:"allow_unauthenticated"`
+	Gen2                 bool   `json:"gen2"`
 	EntryPoint           string `json:"entrypoint"`
 	Memory               string `json:"memory"`
 	Region               string `json:"region"`
@@ -318,6 +319,9 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 
 			if f.AllowUnauthenticated {
 				args = append(args, "--allow-unauthenticated")
+			}
+			if f.Gen2 {
+				args = append(args, "--gen2")
 			}
 			if f.Source != "" {
 				args = append(args, "--source", f.Source)
