@@ -84,6 +84,8 @@ func isValidRuntime(r string) bool {
 		"go111":     true,
 		"go113":     true,
 		"go116":     true,
+		"go118":     true,
+		"go119":     true,
 		"java11":    true,
 		"java17":    true,
 		"dotnet3":   true,
