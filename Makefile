@@ -11,8 +11,8 @@ vet:
 	
 .PHONY: upload-coverage
 upload-coverage:
-	go get github.com/mattn/goveralls
-	/go/bin/goveralls -v -coverprofile=coverage.txt -service=drone.io
+	go install github.com/mattn/goveralls@v0.0.11
+	/go/bin/goveralls -coverprofile=coverage.txt -service=drone.io
 
 
 .PHONY: build

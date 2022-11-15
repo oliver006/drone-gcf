@@ -9,11 +9,12 @@ workspace:
 
 steps:
   - name: test
-    image: "golang:1.16"
+    image: "golang:1.19"
     environment:
       COVERALLS_TOKEN:
         from_secret: coveralls-token
     commands:
+      - date
       - "make drone-tests"
 
 
@@ -53,7 +54,7 @@ steps:
 
 
   - name: sleep-10s
-    image: "golang:1.16"
+    image: "golang:1.19"
     commands:
       - sleep 10
     when:
