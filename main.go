@@ -14,10 +14,11 @@ import (
 )
 
 type Function struct {
-	Name            string `json:"name"`
-	Trigger         string `json:"trigger"`
-	TriggerEvent    string `json:"trigger_event"`
-	TriggerResource string `json:"trigger_resource"`
+	Name              string `json:"name"`
+	Trigger           string `json:"trigger"`
+	TriggerEvent      string `json:"trigger_event"`
+	TriggerResource   string `json:"trigger_resource"`
+	HttpSecurityLevel string `json:"security_level"`
 
 	AllowUnauthenticated bool   `json:"allow_unauthenticated"`
 	Gen2                 bool   `json:"gen2"`
@@ -107,6 +108,13 @@ func isValidTriggerType(t string) bool {
 	}[t]
 }
 
+func isValidSecureType(s string) bool {
+	return map[string]bool{
+		"secure-optional": true,
+		"secure-always":   true,
+	}[s]
+}
+
 func isValidIngressSettings(s string) bool {
 	return map[string]bool{
 		"all":               true,
@@ -138,8 +146,9 @@ func isValidFunctionForDeploy(f Function) bool {
 		return false
 	}
 
-	if f.Trigger == "http" {
-		return true
+	if f.Trigger == "http" && f.HttpSecurityLevel != "" && !isValidSecureType(f.HttpSecurityLevel) {
+		log.Printf("Invalid Secure Level for http trigger for function %s", f.Name)
+		return false
 	}
 
 	if (f.Trigger == "" && f.TriggerEvent == "" && f.TriggerResource == "") || !isValidTriggerType(f.Trigger) {
@@ -324,6 +333,9 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 			}
 			if f.Gen2 {
 				args = append(args, "--gen2")
+			}
+			if f.HttpSecurityLevel != "" {
+				args = append(args, "--security-level", f.HttpSecurityLevel)
 			}
 			if f.Source != "" {
 				args = append(args, "--source", f.Source)
