@@ -335,7 +335,7 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 				args = append(args, "--gen2")
 			}
 			if f.HttpSecure != "" {
-				args = append(args, "--security-level="+f.security_level")
+				args = append(args, "--security-level", f.security_level)
 			}
 			if f.Source != "" {
 				args = append(args, "--source", f.Source)
