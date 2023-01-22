@@ -1,10 +1,12 @@
+---
 kind: pipeline
+type: kubernetes
 name: default
 
 
-workspace:
-  base: /go
-  path: src/github.com/oliver006/drone-gcf
+# workspace:
+#   base: /go
+#   path: src/github.com/oliver006/drone-gcf
 
 
 steps:
@@ -73,7 +75,7 @@ steps:
       action: deploy
       verbose: true
       token:
-        from_secret: token
+        from_secret: gcp_deployment_token
       functions:
         - TestDeployment:
           - trigger: http
