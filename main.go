@@ -82,6 +82,7 @@ func isValidRuntime(r string) bool {
 		"python38":  true,
 		"python39":  true,
 		"python310": true,
+		"python311": true,
 		"go111":     true,
 		"go113":     true,
 		"go116":     true,
