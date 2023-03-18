@@ -12,7 +12,7 @@ RUN BUILD_DATE=$(date +%F-%T) && CGO_ENABLED=0 GOOS=linux go build -o drone-gcf 
 RUN ./drone-gcf -v
 
 
-FROM       gcr.io/google.com/cloudsdktool/cloud-sdk:415.0.0-slim as release
+FROM       gcr.io/google.com/cloudsdktool/cloud-sdk:422.0.0-slim as release
 RUN        apt-get -y install ca-certificates
 COPY       --from=builder /go/src/github.com/oliver006/drone-gcf/drone-gcf /bin/drone-gcf
 ENTRYPOINT /bin/drone-gcf
