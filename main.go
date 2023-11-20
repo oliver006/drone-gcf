@@ -78,6 +78,8 @@ func isValidRuntime(r string) bool {
 		"nodejs12":  true,
 		"nodejs14":  true,
 		"nodejs16":  true,
+		"nodejs18":  true,
+		"nodejs20":  true,
 		"python37":  true,
 		"python38":  true,
 		"python39":  true,
