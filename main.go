@@ -25,7 +25,7 @@ type Function struct {
 	EntryPoint           string `json:"entrypoint"`
 	Memory               string `json:"memory"`
 	Region               string `json:"region"`
-	Retry                string `json:"retry"`
+	Retry                bool   `json:"retry"`
 	Runtime              string `json:"runtime"`
 	Source               string `json:"source"`
 	Timeout              string `json:"timeout"`
@@ -354,8 +354,8 @@ func CreateExecutionPlan(cfg *Config) (Plan, error) {
 			if f.Region != "" {
 				args = append(args, "--region", f.Region)
 			}
-			if f.Retry != "" {
-				args = append(args, "--retry", f.Retry)
+			if f.Retry {
+				args = append(args, "--retry")
 			}
 			if f.Timeout != "" {
 				args = append(args, "--timeout", f.Timeout)
